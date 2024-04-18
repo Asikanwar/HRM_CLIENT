@@ -18,7 +18,7 @@ function Footer() {
             id="profile-link"
             target="_blank"
             
-            href='https://github.com/Saikarthikaji/React.git'
+            href='https://github.com/Asikanwar'
           >
             <i className="fab fa-github fa-1x" />
             GITHUB

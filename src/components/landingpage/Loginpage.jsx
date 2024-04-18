@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import Popup from '../popup_messages/PopupMessage'
 import axios from 'axios';
-import loginImage from "../landingpage/image/login1.png" // Import the image
+import loginImage from "../landingpage/image/login1.png"; // Import the image
+import { Navigate ,useNavigate} from 'react-router-dom';
+
+
+
 const LoginPage = () => {
 
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [error,setError]=useState('')
+  const [showPopup, setShowPopup] = useState(false); 
+  const [popupType, setPopupType] = useState('');
+  const [popupMessage, setPopupMessage] = useState('');
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
   
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setPopupType('error');
+      setPopupMessage('Please fill in all fields');
+      setShowPopup(true);
       return;
     }
   
-    const SERVER_URL = 'http://localhost:5000';
+    const SERVER_URL = 'http://localhost:3000';
   
     try {
       const response = await axios.post(`${SERVER_URL}/login`, {
@@ -26,29 +34,33 @@ const LoginPage = () => {
         password,
       });
   
-      
       let responseData = await response.data;
       let token = responseData.data;
       console.log("token:", token);
       console.log("statuscode:",response.data.statusCode);
       console.log("message:",response.data.message)
       localStorage.setItem("token", token);
-      setIsLoggedIn(true);
       
-      alert('Login successful');
-     
-  } catch (error) {
-      console.log("Error:", error);
-      alert('Login failed');
-      return { statusCode: 404, message: "Something went wrong" };
-  }
-}
+      setPopupType('success');
+      setPopupMessage('Login Successful');
+      setShowPopup(true); 
+      
+    } catch (error) {
+      setPopupType('error');
+      setPopupMessage(error.response.data.message);
+      setShowPopup(true);
+      console.error('Error during login:', error.response.data.message);
+    }
+  };
 
+  const handlePopupOK = () => {
+    setShowPopup(false);
+    navigate('/Landingpage')
+  };
 
-  if (isLoggedIn) {
-    window.location.href = '/Landingpage';
-  }
-
+  const handlePopupTryAgain = () => {
+    setShowPopup(false);
+  };
 
   return (
     <div>
@@ -56,28 +68,18 @@ const LoginPage = () => {
         <div className="container-fluid h-custom">
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-md-9 col-lg-6 col-xl-5">
-            <img
-        src={loginImage} // Use the imported image
-        alt="Login"
-        className="img-fluid"
-      />
+              <img
+                src={loginImage} // Use the imported image
+                alt="Login"
+                className="img-fluid"
+              />
             </div>
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
               <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                <p className="lead fw-normal mb-0 me-3 text-dark"> SIGN IN</p>
-                <button type="button" className="btn btn-primary btn-floating mx-1">
-                  <i className="fab fa-facebook-f" />
-                </button>
-                <button type="button" className="btn btn-primary btn-floating mx-1">
-                  <i className="fab fa-twitter" />
-                </button>
-                <button type="button" className="btn btn-primary btn-floating mx-1">
-                  <i className="fab fa-linkedin-in" />
-                </button>
+        <p className='txt1'>LOG IN</p>
+               
               </div>
-              <div className="divider d-flex align-items-center my-4">
-                <p className="text-center fw-bold mx-3 mb-0">Or</p>
-              </div>
+              
               {/* Email input */}
               <form onSubmit={handleLogin}>
                 <div className="form-outline mb-4">
@@ -143,27 +145,7 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-          {/* Copyright */}
-          <div className="text-white mb-3 mb-md-0 mt-3">Copyright © 2020. All rights reserved. </div>
-    
-          {/* Right */}
-          <div>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-facebook-f" />
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-twitter" />
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-google" />
-            </a>
-            <a href="#!" className="text-white">
-              <i className="fab fa-linkedin-in" />
-            </a>
-          </div>
-          {/* Right */}
-        </div>
+        {showPopup && <Popup type={popupType} message={popupMessage} onOK={handlePopupOK} onTryAgain={handlePopupTryAgain}/>}
       </section>
     </div>
   );

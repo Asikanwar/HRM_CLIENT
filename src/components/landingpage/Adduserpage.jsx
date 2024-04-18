@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import loginImage from "../landingpage/image/login3.png" // Import the image
+import loginImage from "../landingpage/image/login3.png"; // Import the image
+
 const AddUserPage = () => {
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
+  const handleFirstNameChange = (e) => {
+    setFirstName(e.target.value);
+  };
+
+  const handleLastNameChange = (e) => {
+    setLastName(e.target.value);
   };
 
   const handleEmailChange = (e) => {
@@ -27,37 +33,52 @@ const AddUserPage = () => {
   const handleclick = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !address || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-  
+    setError(''); // Reset error state on form submission
 
-    const SERVER_URL = 'http://localhost:5000';
+    if (!firstName || !lastName || !email || !address || !password) {
+      setError('All fields are required');
+      return;
+    }
+
+    const SERVER_URL = 'http://localhost:3000';
 
     try {
+      const token = localStorage.getItem('token'); // Retrieve token from local storage
+      if (!token) {
+        throw new Error('No token found');
+      }
+    
       const response = await axios.post(`${SERVER_URL}/users`, {
-        name,
+        first_name: firstName,
+        last_name: lastName,
         email,
         address,
         password,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}` // Include token in request headers
+        }
       });
-      console.log("response:",response)
 
       if (response && response.status === 201) {
         alert("Form submitted successfully");
         console.log("Form submitted successfully");
-        setName('');
-        setPassword('');
+        setFirstName('');
+        setLastName('');
         setEmail('');
         setAddress('');
-        setError('');
+        setPassword('');
         history.push('/userlist');
       } else {
         alert("Form submission failed");
         console.error('Form submission failed');
       }
     } catch (error) {
-      console.error('Error during form submission:', error);
+      if (error.response && error.response.status === 401) {
+        setError('Invalid token. Please log in again.'); // Handle invalid token error
+      } else {
+        console.error('Error during form submission:', error);
+      }
     }
   };
 
@@ -72,7 +93,7 @@ const AddUserPage = () => {
                   <div className="row justify-content-center">
                     <div className="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
                       <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
-                        ADD USER
+                        SIGN IN
                       </p>
                       <form className="mx-1 mx-md-4" onSubmit={handleclick}>
                         <div className="d-flex flex-row align-items-center mb-4">
@@ -82,11 +103,26 @@ const AddUserPage = () => {
                               type="text"
                               id="form3Example1c"
                               className="form-control"
-                              value={name}
-                              onChange={handleNameChange}
+                              value={firstName}
+                              onChange={handleFirstNameChange}
                             />
                             <label className="form-label" htmlFor="form3Example1c">
-                              YOUR NAME
+                              FIRST NAME
+                            </label>
+                          </div>
+                        </div>
+                        <div className="d-flex flex-row align-items-center mb-4">
+                          <i className="fas fa-user fa-lg me-3 fa-fw" />
+                          <div className="form-outline flex-fill mb-0">
+                            <input
+                              type="text"
+                              id="form3Example1c"
+                              className="form-control"
+                              value={lastName}
+                              onChange={handleLastNameChange}
+                            />
+                            <label className="form-label" htmlFor="form3Example1c">
+                              LAST NAME
                             </label>
                           </div>
                         </div>
@@ -101,7 +137,7 @@ const AddUserPage = () => {
                               onChange={handleEmailChange}
                             />
                             <label className="form-label" htmlFor="form3Example3cEmail">
-                              YOUR EMAIL
+                              EMAIL
                             </label>
                           </div>
                         </div>
@@ -153,17 +189,17 @@ const AddUserPage = () => {
                             type="submit"
                             className="btn btn-primary btn-lg"
                           >
-                            AddUser
+                            Sign IN
                           </button>
                         </div>
                       </form>
                     </div>
                     <div className="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2 mb-5">
-                    <img
-        src={loginImage} // Use the imported image
-        alt="Login"
-        className="img-fluid"
-      />
+                      <img
+                        src={loginImage} // Use the imported image
+                        alt="Login"
+                        className="img-fluid"
+                      />
                     </div>
                   </div>
                 </div>

@@ -27,7 +27,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://freecodecamp-solutions.github.io/Build-A-Tribute-Page/"
+                href=""
               >
                 <img
                   src={image1}
@@ -44,7 +44,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://freecodecamp-solutions.github.io/Personal-Portfolio-Webpage/"
+                href=""
               >
                 <img
                   src={image2}
@@ -61,7 +61,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://freecodecamp-solutions.github.io/Technical-Documentation-Page/"
+                href=""
               >
                 <img
                   src={image3}
@@ -78,7 +78,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://freecodecamp-solutions.github.io/Product-Landing-Page/"
+                href=""
               >
                 <img
                   src={image4}
@@ -95,7 +95,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://sites.google.com/view/dev-afif/"
+                href=""
               >
                 <img
                   src={image5}
@@ -112,7 +112,7 @@ const LandingPage = () => {
             <div className="box">
               <a
                 target="_blank"
-                href="https://freecodecamp-solutions.github.io/Build-a-Survey-Form/"
+                href=""
               >
                 <img
                   src={image6}
@@ -127,7 +127,7 @@ const LandingPage = () => {
               </a>
             </div>
           </div>
-          <a href="https://github.com/FreeCodeCamp-Solutions" className="btn">
+          <a href="" className="btn">
             Show More
           </a>
         </div>
