@@ -3,32 +3,26 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import './ViewListPage.css';
 
-
 const UserDetail = () => {
   const { id } = useParams(); 
   const [user, setUser] = useState(null);
-  const [editableUser , setEditableUser] = useState(null);
-
+  const [editableUser, setEditableUser] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("userId : ", id); 
-
         const token = localStorage.getItem('accessToken');
         const response = await axios.get(`http://localhost:3000/users/${id}`, {
           headers: {
             'authorization': `Bearer ${token}`
           }
         });
-        console.log("response : ", response);
         
         setUser(response.data);
-        setEditableUser(response.data)
-
-        
-        // console.log("user : ", user);
-        
+        setEditableUser(response.data);
+        setProfileImage(response.data.profileImage || null);
       } catch (error) {
         console.error('Error fetching user:', error);
       }
@@ -37,48 +31,66 @@ const UserDetail = () => {
     fetchUser();
   }, [id]);
   
-  useEffect(() => {
-    
-    console.log("user : ", user);
-  }, [user]);
   const handleEdit = () => {
-  
     console.log('Edit clicked');
-    setEditableUser({...user})
+    setEditableUser({ ...user });
   };
 
-  const handleSave = async () => {
-    
+  const handleSave = async (e) => {
+    e.preventDefault();
     console.log('Save clicked');
 
     try {
       const token = localStorage.getItem('accessToken');
+      const formData = new FormData();
 
-      const response = await axios.put(`http://localhost:3000/editData/${id}`,editableUser,
-     { 
-      headers : {
-        'authorization' : `Bearer ${token}`
+      // Append editableUser fields to formData
+      for (const key in editableUser) {
+        formData.append(key, editableUser[key]);
       }
+
+      // Append profileImage if it's selected
+      if (profileImage) {
+        formData.append('profileImage', profileImage); // Ensure this matches your backend's file field name
+      }
+
+      console.log('FormData:', formData); // Check FormData before sending
+
+      const response = await axios.put(`http://localhost:3000/editData/${id}`, formData, { 
+        headers: {
+          'authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data' // Ensure correct content type
+        }
       });
-      console.log("user updated successfully",response.data)
-      setUser(response.data)
 
-    }catch(error){
-      console.error('error updating user : ',error)
+      console.log("User updated successfully", response.data);
+      setUser(response.data);
 
+    } catch (error) {
+      console.error('Error updating user:', error);
     }
   };
 
-  
-
-  const handleInputChange =(e)=>{
+  const handleInputChange = (e) => {
     setEditableUser({
       ...editableUser,
-      [e.target.name]:e.target.value
+      [e.target.name]: e.target.value
     });
+  };
 
-  }
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setProfileImage(file);
 
+    // Display image preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!user) {
     return <div>Loading...</div>;
@@ -86,48 +98,55 @@ const UserDetail = () => {
 
   return (
     <div className="background">
-    <div className="user-details-container">
-      <h1>User Details</h1>
-      <form>
-        <div className="form-group">
-          <label className="label">First Name:</label>
-
-          {editableUser ? (
-            <input type="text" name="first_name" value={editableUser.first_name} onChange={handleInputChange} />
-          ) : (
-          <input type="text" value={user.first_name} disabled = {true}/>
-       ) }
-        </div>
-        <div className="form-group">
-          <label className="label">Last Name:</label>
-
-          {editableUser ? (
-            <input type="text" name='last_name' value={editableUser.last_name} onChange={handleInputChange}/>
-          ) : (
-          <input type="text" value={user.last_name} disabled = {true}/>
-        )}
-        </div>
-        <div className="form-group">
+      <div className="user-details-container">
+        <h1>User Details</h1>
+        <form onSubmit={handleSave}>
+          <div className="form-group">
+            <label className="label">First Name:</label>
+            <input
+              type="text"
+              name="first_name"
+              value={editableUser.first_name}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label className="label">Last Name:</label>
+            <input
+              type="text"
+              name='last_name'
+              value={editableUser.last_name}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
             <label className="label">Email:</label>
-            {editableUser ? (
-              <input type="email" name="email" value={editableUser.email} onChange={handleInputChange} />
-            ) : (
-              <input type="email" value={user.email}  />
+            <input
+              type="email"
+              name="email"
+              value={editableUser.email}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label className="label">Profile Image:</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            {imagePreview && (
+              <img src={imagePreview} alt="Profile Preview" className="image-preview" />
             )}
           </div>
-        {/* <div className="form-group">
-          <label className="label">Password:</label>
-          <input type="password" value={user.password} />
-        </div> */}
-        <div className="button-group">
-          <button type="button" className="edit-button" onClick={handleEdit}>Edit</button>
-          <button type="button" className="save-button" onClick={handleSave}>Save</button>
-        </div>
-      </form>
-    </div>
+          <div className="button-group">
+            <button type="button" className="edit-button" onClick={handleEdit}>Edit</button>
+            <button type="submit" className="save-button">Save</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
-
 
 export default UserDetail;

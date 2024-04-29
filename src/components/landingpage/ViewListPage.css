@@ -156,3 +156,6 @@ input[type="email"] {
     margin: 50px; /* Adjust as needed */
   }
 }
+.image-preview{
+  width: 78px;
+}
